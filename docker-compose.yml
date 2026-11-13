@@ -1,0 +1,81 @@
+services:
+  kinesis-app:
+    build:
+      context: ./spring_kinesis_producer_consumer_demo
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      AWS_KINESIS_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY: test
+      AWS_SECRET_KEY: test
+
+  jobmanager:
+    image: flink:2.0.0-java21
+    ports:
+      - "8081:8081"
+    command: standalone-job --job-classname org.example.Main
+    volumes:
+      - type: bind
+        source: ./kotlin_kinesis_streams_flink_demo/target/user-enrichment-job-demo-1.0-SNAPSHOT.jar
+        target: /opt/flink/usrlib/user-enrichment-job-demo.jar
+        read_only: true
+        bind:
+          create_host_path: false
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        parallelism.default: 1
+    depends_on:
+      - kinesis-app
+
+  taskmanager:
+    image: flink:2.0.0-java21
+    depends_on:
+      - jobmanager
+      - kinesis-app
+    command: taskmanager
+    volumes:
+      - type: bind
+        source: ./kotlin_kinesis_streams_flink_demo/target/user-enrichment-job-demo-1.0-SNAPSHOT.jar
+        target: /opt/flink/usrlib/user-enrichment-job-demo.jar
+        read_only: true
+        bind:
+          create_host_path: false
+    scale: 1
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 1
+        parallelism.default: 1
+
+  localstack:
+    image: localstack/localstack:3.8.1
+    healthcheck:
+      test: ["CMD", "awslocal", "kinesis", "list-streams"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    container_name: localstack-kinesis
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=kinesis
+      - DEBUG=1
+    volumes:
+      - "./.localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
