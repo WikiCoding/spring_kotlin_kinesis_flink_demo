@@ -25,4 +25,5 @@ object Configs {
     const val USER_ENRICHMENT_JOB_NAME = "UserEnrichmentJob"
     const val WATERMARK_IDLE_TIMEOUT_MS = 1000L
     const val MAX_TIME_IN_BUFFER_MS = 50L
+    const val ENRICHMENT_TIMEOUT_MS = 3000L
 }
