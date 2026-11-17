@@ -21,6 +21,7 @@ object KinesisSinkBuilder {
             .setSerializationSchema(SimpleStringSchema())
             .setPartitionKeyGenerator { it.hashCode().toString() }
             .setStreamName(Configs.ENRICHED_STREAM_NAME)
+            .setMaxTimeInBufferMS(Configs.MAX_TIME_IN_BUFFER_MS)
             .build()
     }
 }

@@ -13,7 +13,7 @@ object Configs {
     const val USER_ROLE_STREAM_SOURCE_NAME = "UserRoleKinesisSource"
     const val USER_ROLE_STREAM_SOURCE_UID = "UserRoleKinesisSource-uid"
     const val USER_ROLE_STREAM_ARN = "arn:aws:kinesis:us-east-1:000000000000:stream/userrole-stream"
-    const val ENRICHMENT_TIMEOUT_MS = 3_000L // Emit partial enrichment when the watermark reaches the event-time deadline.
+    const val STATE_TTL_DURATION_HOURS = 24L
     const val ENRICHED_STREAM_NAME = "user-enriched-stream"
     const val JOB_PARALLELISM = 1
     const val STATE_BACKEND_OPTION = "hashmap"
@@ -24,4 +24,5 @@ object Configs {
     const val USER_ENRICHED_SINK_UID = "UserEnrichedKinesisSink-uid"
     const val USER_ENRICHMENT_JOB_NAME = "UserEnrichmentJob"
     const val WATERMARK_IDLE_TIMEOUT_MS = 1000L
+    const val MAX_TIME_IN_BUFFER_MS = 50L
 }
